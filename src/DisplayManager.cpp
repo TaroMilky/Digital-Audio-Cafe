@@ -25,7 +25,7 @@ void DisplayManager::init() {
     // 4. Boost Speed (Optional)
     // If the screen looks glitchy, comment this out to use default speed.
     // 20MHz is usually safe.
-    // tft->setSpispeed(20000000); 
+    tft->setSPISpeed(20000000); 
 
     tft->setRotation(0); 
     tft->fillScreen(BLACK);
