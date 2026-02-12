@@ -1,45 +1,55 @@
 #include <Arduino.h>
-#include <Adafruit_NeoPixel.h>
+#include "InputManager.h"
+#include "DisplayManager.h"
+#include "MusicPlayer.h"
 
-#define LED_PIN 38 
+// Global Objects
+InputManager input;
+DisplayManager display;
+MusicPlayer player;
 
-#define NUMPIXELS 1
-Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+int currentVol = 50; // Start at 50% volume
 
 void setup() {
     Serial.begin(115200);
-    // Wait for USB (Timeout 3s)
-    int t=0; while(!Serial && t<3000) { delay(1); t++; }
+    
+    // 2 seconds to open the monitor before printing anything
+    delay(2000); 
 
-    Serial.println("\n--- LED TESTER ---");
-    Serial.printf("Testing GPIO %d... Watch the board!\n", LED_PIN);
-
-    pixels.begin();
-    pixels.setBrightness(50); // Increased brightness to be sure
+    Serial.println("\n--- DIGITAL AUDIO CAFE: ONLINE ---");
+    
+    input.init();
+    display.init();
+    player.init();
+    
+    display.drawInterface();
+    display.updateVolume(currentVol); 
 }
 
 void loop() {
-    // RED
-    pixels.setPixelColor(0, pixels.Color(255, 0, 0));
-    pixels.show();
-    Serial.println("Color: RED");
-    delay(500);
+    InputEvent e = input.poll();
 
-    // GREEN
-    pixels.setPixelColor(0, pixels.Color(0, 255, 0));
-    pixels.show();
-    Serial.println("Color: GREEN");
-    delay(500);
-
-    // BLUE
-    pixels.setPixelColor(0, pixels.Color(0, 0, 255));
-    pixels.show();
-    Serial.println("Color: BLUE");
-    delay(500);
-
-    // OFF
-    pixels.clear();
-    pixels.show();
-    Serial.println("OFF");
-    delay(1000);
+    // IF logic to handle inputs
+    if (e == EVENT_VOL_UP) {
+        currentVol += 2; 
+        if(currentVol > 100) currentVol = 100;
+        
+        player.setVolume(currentVol);
+        display.updateVolume(currentVol);
+        Serial.printf("Vol: %d (UP)\n", currentVol);
+    }
+    else if (e == EVENT_VOL_DOWN) {
+        currentVol -= 2;
+        if(currentVol < 0) currentVol = 0;
+        
+        player.setVolume(currentVol);
+        display.updateVolume(currentVol);
+        Serial.printf("Vol: %d (DOWN)\n", currentVol);
+    }
+    else if (e == EVENT_SELECT) {
+        display.drawTest(); // Flash Red
+        delay(100);
+        display.drawInterface(); // Redraw UI
+        display.updateVolume(currentVol); // Restore volume bar
+    }
 }
