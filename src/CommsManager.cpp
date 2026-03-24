@@ -13,7 +13,6 @@ void CommsManager::init() {
 }
 
 void CommsManager::update() {
-
     if (ManagerUART.available() > 0) {
         char incoming_byte = ManagerUART.read();
         if (incoming_byte == '\n') {
@@ -26,7 +25,6 @@ void CommsManager::update() {
             rx_index++;
         }
     }
-
 }
 
 int CommsManager::getVolume() {
