@@ -37,7 +37,7 @@ public:
     bool initSDCard();
     static void audioTaskTrampoline(void* _thisInstance);
     void audioTask();
-    bool openAudioFile(const char* filename);
+    // bool openAudioFile(const char* filename);
     void setVolume(float target_volume_from_main);
     void setSmoothingFactor(float smoothing_factor_from_main);
     void playSineWave();
