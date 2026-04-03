@@ -1,5 +1,4 @@
-#ifndef COMMS_MANAGER_H
-#define COMMS_MANAGER_H
+#pragma once
 
 class CommsManager {
 
@@ -16,8 +15,6 @@ public:
 
     void init();
     void update();
-    float getVolume();
-    float getSmoothing();
+    float get_volume();
+    float get_smoothing();
 };
-
-#endif
