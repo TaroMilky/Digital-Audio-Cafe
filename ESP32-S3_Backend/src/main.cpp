@@ -8,21 +8,21 @@ float fetched_volume = 0.0f;
 float fetched_smoothing = 0.0f;
 
 // Global Objects
-HardwareSerial ManagerUART(1); // Claims UART 1 (UART 0 is for USB Serial monitor)
+HardwareSerial manager_uart(1); // Claims UART 1 (UART 0 is for USB Serial monitor)
 CommsManager frontend;
 AudioPlayer audio;
-SemaphoreHandle_t audioMutex;
+SemaphoreHandle_t audio_mutex;
 
-void frontendTask(void *pvParameters) {
+void frontend_task(void *pv_parameters) {
     while(1) {
         vTaskDelay(10 / portTICK_PERIOD_MS); // delay for 10 ms (polling @100hz)
 
         frontend.update();
 
-        if (xSemaphoreTake(audioMutex, portMAX_DELAY) == pdTRUE) { // "Take" the key; if not available, wait
-            fetched_volume = frontend.getVolume(); // Current "system volume"
-            fetched_smoothing = frontend.getSmoothing(); // Current smoothing value
-            xSemaphoreGive(audioMutex); // "Give" the key back
+        if (xSemaphoreTake(audio_mutex, portMAX_DELAY) == pdTRUE) { // "Take" the key; if not available, wait
+            fetched_volume = frontend.get_volume(); // Current "system volume"
+            fetched_smoothing = frontend.get_smoothing(); // Current smoothing value
+            xSemaphoreGive(audio_mutex); // "Give" the key back
         }
 
         // Debugging CommsManager
@@ -34,16 +34,16 @@ void frontendTask(void *pvParameters) {
     }
 }
 
-void audioTask(void *pvParameters) {
+void audio_task_main(void *pv_parameters) {
     while(1) {
 
-        if (xSemaphoreTake(audioMutex, portMAX_DELAY) == pdTRUE) { // "Take" the key; if not available, wait
-            audio.setVolume(fetched_volume);
-            audio.setSmoothingFactor(fetched_smoothing);
-            xSemaphoreGive(audioMutex); // "Give" the key back
+        if (xSemaphoreTake(audio_mutex, portMAX_DELAY) == pdTRUE) { // "Take" the key; if not available, wait
+            audio.set_volume(fetched_volume);
+            audio.set_smoothing_factor(fetched_smoothing);
+            xSemaphoreGive(audio_mutex); // "Give" the key back
         }
 
-        audio.playSineWave();
+        audio.play_sine_wave();
 
     }
 }
@@ -59,14 +59,13 @@ void setup() {
 
     frontend.init();
     audio.init();
-    audio.initSDCard();
 
     // FreeRTOS tasks
-    audioMutex = xSemaphoreCreateMutex();
+    audio_mutex = xSemaphoreCreateMutex();
 
     xTaskCreatePinnedToCore(      
-        frontendTask,      // 1. Pointer to the task function
-        "FrontendTask",    // 2. Name of task (for debugging, e.g., "AudioTask")
+        frontend_task,      // 1. Pointer to the task function
+        "frontend_task",    // 2. Name of task (for debugging, e.g., "audio_task_main")
         4096,              // 3. Stack size in words (Use 4096 or 8192 for now)
         NULL,              // 4. Parameter to pass to function (Usually NULL)
         1,                 // 5. Task priority (0 is lowest, 1 is normal, configMAX_PRIORITIES-1 is highest)
@@ -75,8 +74,8 @@ void setup() {
     );
 
     xTaskCreatePinnedToCore(      
-        audioTask,         // 1. Pointer to the task function
-        "AudioTask",       // 2. Name of task (for debugging, e.g., "AudioTask")
+        audio_task_main,         // 1. Pointer to the task function
+        "audio_task_main",       // 2. Name of task (for debugging, e.g., "audio_task_main")
         4096,              // 3. Stack size in words (Use 4096 or 8192 for now)
         NULL,              // 4. Parameter to pass to function (Usually NULL)
         2,                 // 5. Task priority (0 is lowest, 1 is normal, configMAX_PRIORITIES-1 is highest)
