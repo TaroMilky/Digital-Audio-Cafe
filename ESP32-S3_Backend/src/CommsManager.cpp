@@ -1,14 +1,14 @@
 #include <Arduino.h>
 #include "CommsManager.h"
 
-extern HardwareSerial ManagerUART;
+extern HardwareSerial manager_uart;
 
 CommsManager::CommsManager() {
     rx_index = 0;
 }
 
 void CommsManager::init() {
-    ManagerUART.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
+    manager_uart.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
 }
 
 
@@ -17,8 +17,8 @@ void CommsManager::init() {
 
 
 void CommsManager::update() {
-    if (ManagerUART.available() > 0) {
-        char incoming_byte = ManagerUART.read();
+    if (manager_uart.available() > 0) {
+        char incoming_byte = manager_uart.read();
         if (incoming_byte == '\n') {
             rx_buffer[rx_index] = '\0';
             
@@ -35,10 +35,10 @@ void CommsManager::update() {
     }
 }
 
-float CommsManager::getVolume() {
+float CommsManager::get_volume() {
     return current_volume;
 }
 
-float CommsManager::getSmoothing() {
+float CommsManager::get_smoothing() {
     return current_smoothing;
 }
