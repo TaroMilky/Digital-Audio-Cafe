@@ -1,11 +1,15 @@
 # Explicit PlatformIO Ignores
 ESP32-S3_Backend/.pio/
 ESP32-S3_Backend/.vscode/
+**/.pio/
+**/.piolibdeps/
 
 # Explicit STM32/CMake Ignores
 STM32U575_Frontend/build/
 STM32U575_Frontend/.settings/
 STM32U575_Frontend/.mxproject
+compile_commands.json
+CMakeLists.txt.user
 
 # OS
 .DS_Store
